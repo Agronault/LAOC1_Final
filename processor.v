@@ -121,16 +121,16 @@ case(Step)
       writeEnableRegInstruction <= 1'b0;  
       writeEnableRegAddress <= 1'b1;
       controlMux <= 2'b01;  // Endereco de qual registrador em que esta' o endereco da memoria (00 ou 01)
-      ReadAddressRF1 <= instruction[8:6];
-      ReadAddressRF2 <= instruction[5:3];      
+      ReadAddressRF1 <= instruction[7:4];
+      ReadAddressRF2 <= instruction[3:0];      
 
     end     
     4'b1100:  // store
     begin
       incr_pc  <= 1'b0;
       writeEnableRegInstruction <= 1'b0;  
-      ReadAddressRF1 <= instruction[11:9];
-      ReadAddressRF2 <= instruction[8:6];      
+      ReadAddressRF1 <= instruction[11:8];
+      ReadAddressRF2 <= instruction[7:4];      
 
       writeEnableRegAddress <= 1'b1;
       controlMux <= 2'b00;  // seleciona o endereco da memoria onde o dado sera escrito  (00 ou 01)
@@ -142,8 +142,8 @@ case(Step)
     begin
       incr_pc  <= 1'b0;
       writeEnableRegInstruction <= 1'b0;  
-      ReadAddressRF1 <= instruction[8:6];
-      ReadAddressRF2 <= instruction[5:3];
+      ReadAddressRF1 <= instruction[7:4];
+      ReadAddressRF2 <= instruction[3:0];
 
     end
 
@@ -155,7 +155,7 @@ case(Step)
       controlMux <= 2'b0;
       ReadAddressRF2 <= 3'b111;
       writeEnableRegAddress <= 1'b1;
-      ReadAddressRF1 <= instruction[8:6];
+      ReadAddressRF1 <= instruction[7:4];
 
     end     
 
@@ -163,8 +163,8 @@ case(Step)
     begin
       incr_pc  <= 1'b0;
       writeEnableRegInstruction <= 1'b0;  
-      ReadAddressRF1 <= instruction[8:6];
-      ReadAddressRF2 <= instruction[5:3];      
+      ReadAddressRF1 <= instruction[7:4];
+      ReadAddressRF2 <= instruction[3:0];      
 
     end
 
@@ -176,8 +176,8 @@ case(Step)
       writeEnableRegALU <= 1'b1;
       controlAlu <= 2'b00;
       controlMux <= 2'b11;
-      ReadAddressRF1 <= instruction[8:6];
-      ReadAddressRF2 <= instruction[5:3];
+      ReadAddressRF1 <= instruction[7:4];
+      ReadAddressRF2 <= instruction[3:0];
 
     end 
     
@@ -189,8 +189,8 @@ case(Step)
       writeEnableRegALU <= 1'b1;
       controlAlu <= 2'b01;
       controlMux <= 2'b11;
-      ReadAddressRF1 <= instruction[8:6];
-     ReadAddressRF2 <= instruction[5:3];
+      ReadAddressRF1 <= instruction[7:4];
+     ReadAddressRF2 <= instruction[3:0];
 
     end 
     
@@ -202,8 +202,8 @@ case(Step)
       writeEnableRegALU <= 1'b1;
       controlAlu <= 2'b10;
       controlMux <= 2'b11;
-      ReadAddressRF1 <= instruction[8:6];
-      ReadAddressRF2 <= instruction[5:3];
+      ReadAddressRF1 <= instruction[7:4];
+      ReadAddressRF2 <= instruction[3:0];
  
     end 
     
@@ -215,8 +215,8 @@ case(Step)
       writeEnableRegALU <= 1'b1;
       controlAlu <= 2'b11;
       controlMux <= 2'b11;
-      ReadAddressRF1 <= instruction[8:6];
-      ReadAddressRF2 <= instruction[5:3];
+      ReadAddressRF1 <= instruction[7:4];
+      ReadAddressRF2 <= instruction[3:0];
 
     end 
   endcase     
@@ -308,7 +308,7 @@ end
 endmodule
 
 
-module PC_reg7 (R, L, incr_pc, Clock, Q);
+module PC_reg15 (R, L, incr_pc, Clock, Q);
 input [15:0] R;
 input L, incr_pc, Clock;
 output reg [15:0] Q;
@@ -333,12 +333,12 @@ input [15:0] WriteData;
 input RegWrite, clock, incr_pc;
 output [15:0] Data1, Data2;
      
-wire [7:0] decOut;          
-wire [15:0] register [7:0];
+wire [15:0] decOut;   //falta editar o módulo em sí       
+wire [15:0] register [15:0];
 
 decoder dec1(WriteReg, decOut);
 
-PC_reg7 PC(WriteData, decOut[7]& RegWrite, incr_pc, clock, register[7]);
+PC_reg15 PC(WriteData, decOut[15]& RegWrite, incr_pc, clock, register[15]);
 
 register16bits register1(WriteData, decOut[0]& RegWrite , clock, register[0]);
 register16bits register2(WriteData, decOut[1]& RegWrite , clock, register[1]);
@@ -347,13 +347,21 @@ register16bits register4(WriteData, decOut[3]& RegWrite , clock, register[3]);
 register16bits register5(WriteData, decOut[4]& RegWrite , clock, register[4]);
 register16bits register6(WriteData, decOut[5]& RegWrite , clock, register[5]);
 register16bits register7(WriteData, decOut[6]& RegWrite , clock, register[6]);
+register16bits register8(WriteData, decOut[7]& RegWrite , clock, register[7]);
+register16bits register9(WriteData, decOut[8]& RegWrite , clock, register[8]);
+register16bits register10(WriteData, decOut[9]& RegWrite , clock, register[9]);
+register16bits register11(WriteData, decOut[10]& RegWrite , clock, register[10]);
+register16bits register12(WriteData, decOut[11]& RegWrite , clock, register[11]);
+register16bits register13(WriteData, decOut[12]& RegWrite , clock, register[12]);
+register16bits register14(WriteData, decOut[13]& RegWrite , clock, register[13]);
+register16bits register15(WriteData, decOut[14]& RegWrite , clock, register[14]);
 
 assign Data1 = register[Read1];
 assign Data2 = register[Read2];
 
 endmodule
 
-module decoder #(parameter N = 3) (input [N-1:0] DataIn, output reg [(1<<N)-1:0] DataOut);
+module decoder #(parameter N = 4) (input [N-1:0] DataIn, output reg [(1<<N)-1:0] DataOut);
     always @ (DataIn)
      begin
        DataOut <= 1 << DataIn;
